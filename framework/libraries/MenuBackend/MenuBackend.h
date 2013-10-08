@@ -6,6 +6,7 @@
 || @contribution   Bernhard Benum
 || @contribution   Brett Hagman <bhagman@wiring.org.co>
 || @contribution   Ryan Michael <kerinin@gmail.com>
+|| @contribution   Jeremy Vance <jeremyvnc@gmail.com>
 ||
 || @description
 || | Provides an easy way of making menus.
@@ -244,7 +245,17 @@ class MenuItem
     {
       return left;
     }
-
+    /*
+    || @description
+    || | Get the item that represents the 'exit' of this item
+    || #
+    ||
+    || @return the item that represents the exit node of this node
+    */
+    inline MenuItem *getExit() const
+    {
+      return exit;
+    }
     //default vertical menu
     /*
     || @description
@@ -319,6 +330,20 @@ class MenuItem
       if (!mi.back) mi.back = back;
       return mi;
     }
+	/*
+    || @description
+    || | Add an item that represents exit node of this item in the hierarchy
+    || #
+    ||
+    || @parameter ext is the exit item
+    || @return the item sent as parameter for chaining
+    */
+    MenuItem &addExit(MenuItem &ext)
+    {
+      exit = &ext;
+      return ext;
+    }
+	  
     /*
     || @description
     || | Set a callback to be fired before any 'move' function is called with this item 
@@ -476,6 +501,7 @@ class MenuItem
     MenuItem *after;
     MenuItem *left;
     MenuItem *back;
+	MenuItem *exit;
 
     cb_change cb_onChangeFrom;
     cb_change cb_onChangeTo;
@@ -492,6 +518,15 @@ class MenuItem
     friend class MenuBackend;
     MenuItem *moveBack()
     {
+      return back;
+    }
+
+    MenuItem *moveExit()
+    {
+      if (exit)
+      {
+        exit->back = this;
+      }
       return back;
     }
 
@@ -592,6 +627,15 @@ class MenuBackend
         (*current->cb_onBack)(mme);
       }
       setCurrent(current->getBack());
+    }
+	/*
+    || @description
+    || | Move to the exit item for this node in the menu structure, will fire move event
+    || #
+    */
+    void moveExit()
+    {
+      setCurrent(current->getExit());
     }
     /*
     || @description
